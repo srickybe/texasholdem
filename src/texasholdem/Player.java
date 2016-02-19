@@ -12,7 +12,7 @@ import java.util.Scanner;
  *
  * @author ricky
  */
-class Player {
+public class Player {
 
     private final String name;
     private int stack;
@@ -95,7 +95,7 @@ class Player {
         Integer chipsToAddToPot1 = 0;
 
         while (chipsToAddToPot1 < bigBlind || chipsToAddToPot1 >= getStack()) {
-            System.out.println("Bet any amount between 0 and "
+            System.out.println("Bet any amount between " + bigBlind + " and "
                     + getStack() + " excluded");
             chipsToAddToPot1 = getIntegerInput();
         }
@@ -181,7 +181,7 @@ class Player {
         return amount;
     }
 
-    public boolean hasDoubleChecked() {
+    public boolean doubleChecked() {
         int actionCount = actions.size();
         
         if (actionCount >= 2) {
