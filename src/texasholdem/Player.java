@@ -233,11 +233,6 @@ public class Player {
     }
 
     int raiseInferiorToLastRaise(int highestBet, int lastRaise) {
-        /*if (getStack() >= 2 * lastRaise) {
-            System.out.println(getStack() + " > " + 2 * lastRaise);
-            throw new UnsupportedOperationException();
-        }*/
-
         int bet = getCurrentBet() + getStack();
         int chipsToAddToPot1 = getStack();
         substract(chipsToAddToPot1);
