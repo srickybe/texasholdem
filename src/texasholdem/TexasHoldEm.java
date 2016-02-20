@@ -17,6 +17,10 @@ public class TexasHoldEm {
     public static void main(String[] args) {
         // TODO code application logic here
         Game game = new Game();
+        game.add(new Player("Ricky"));
+        game.add(new Player("Gery"));
+        game.add(new Player("Audry"));
+        game.add(new Player("Flora"));
         game.bettingRound();
     }
     

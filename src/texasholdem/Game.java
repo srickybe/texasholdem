@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @author ricky
  */
 public class Game {
+
     ArrayList<Player> players;
     ArrayList<Pot> pots;
     ArrayList<Player> whoRaised;
@@ -20,10 +21,6 @@ public class Game {
 
     Game() {
         this.players = new ArrayList<>();
-        this.players.add(new Player("Ricky"));
-        this.players.add(new Player("Gery"));
-        this.players.add(new Player("Audry"));
-        this.players.add(new Player("Flora"));
         this.pots = new ArrayList<>();
         this.whoRaised = new ArrayList<>();
         this.raises = new ArrayList<>();
@@ -31,11 +28,13 @@ public class Game {
     }
 
     public void add(Player player) {
-        if(!players.add(player)) {
-            throw new UnsupportedOperationException();
+        if (!players.contains(player)) {
+            if (!players.add(player)) {
+                throw new UnsupportedOperationException();
+            }
         }
     }
-    
+
     private int getHighestBet() {
         return highestBets.get(highestBets.size() - 1);
     }
@@ -72,10 +71,22 @@ public class Game {
         raises.add(raise);
     }
 
+    private int countActivePlayer() {
+        int count = 0;
+
+        for (Player player : players) {
+            if (!player.folded() && !player.isAllIn()) {
+                ++count;
+            }
+        }
+
+        return count;
+    }
+
     private boolean noBet() {
         for (int i = 0; i < players.size(); ++i) {
             Player player = players.get(i);
-            Action action = player.latestAction();
+            Action action = player.lastAction();
 
             if (action != null && !action.isCheck() && !action.isFold()) {
                 return false;
@@ -85,38 +96,9 @@ public class Game {
         return true;
     }
 
-    private int raiseCount() {
-        int result = 0;
-
-        for (Player player : players) {
-            Action action = player.latestAction();
-
-            if (action.isRaise()
-                    || action.isRaiseAllIn()
-                    || action.isRaiseInferiorToLastRaise()
-                    || action.isBet()) {
-                ++result;
-            }
-        }
-
-        return result;
-    }
-
-    private boolean everyOneActed() {
-        for (Player player : players) {
-            Action action = player.latestAction();
-
-            if (action == null) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private boolean previousRaise() {
         for (Player player : players) {
-            Action action = player.latestAction();
+            Action action = player.lastAction();
 
             if (action != null) {
                 if (action.isBet()
@@ -129,14 +111,6 @@ public class Game {
         }
 
         return false;
-    }
-
-    class ALLInException extends Exception {
-
-        public ALLInException(String message) {
-            super(message);
-        }
-
     }
 
     Player lastPlayerToRaise() {
@@ -167,66 +141,82 @@ public class Game {
         boolean end = false;
         pots.add(new Pot(0, players));
 
-        for (int i = 0; !end;) {
+        for (int i = 0; !end; i = nextInt(i)) {
+            System.out.println("#####game = " + this);
             Player player = players.get(i);
-            System.out.println("player = " + player);
-            System.out.println("Highest bet = " + getHighestBet());
+
+            if (player.folded()) {
+                continue;
+            }
+
             ArrayList<Action> actions = possibleActions(player);
 
             if (actions.isEmpty()) {
-                break;
+                continue;
             }
 
             Decision decision = player.act(actions, getHighestBet(), maxRaise());
-            System.out.println("decision = " + decision);
+            applyDecision(decision, player);
+            System.out.println("game = " + this);
 
-            switch (decision.getAction()) {
-                case BET:
-                    updateAfterRaise(decision, player);
-                    break;
-
-                case CALL:
-                    updateAfterCall(decision);
-                    break;
-
-                case CALL_ALL_IN:
-                    updateAfterCall(decision);
-                    throw new UnsupportedOperationException();
-
-                case CHECK:
-                    end = raiseChecked(player)
-                            || (everyPlayerChecked() && player.doubleChecked());
-                    break;
-
-                case FOLD:
-                    players.remove(player);
-                    --i;
-                    end = onePlayerLeft();
-                    break;
-
-                case RAISE:
-                    updateAfterRaise(decision, player);
-                    break;
-
-                case RAISE_ALL_IN:
-                    updateAfterRaise(decision, player);
-                    throw new UnsupportedOperationException();
-
-                case RAISE_INFERIOR_TO_LAST_RAISE:
-                    updateAfterRaise(decision, player);
-                    break;
-
-                default:
-                    break;
+            if (onePlayerLeft()
+                    || raiseChecked(player)
+                    || (everyPlayerChecked() && player.doubleChecked())) {
+                System.out.println("onPlayerLeft() = " + onePlayerLeft());
+                System.out.println("raiseChecked(player) = "
+                        + raiseChecked(player));
+                System.out.println("everyPlayerChecked() = "
+                        + everyPlayerChecked());
+                System.out.println("player.doubleChecked() = "
+                        + player.doubleChecked());
+                break;
             }
+        }
+    }
 
-            System.out.println("player = " + player);
-            System.out.println("pot = " + getCurrentPot());
-            ++i;
+    private int nextInt(int i) {
+        ++i;
 
-            if (i >= players.size()) {
-                i = 0;
-            }
+        if (i >= players.size()) {
+            i = 0;
+        }
+
+        return i;
+    }
+
+    private void applyDecision(Decision decision, Player player) {
+        switch (decision.getAction()) {
+            case BET:
+                updateAfterRaise(decision, player);
+                break;
+
+            case CALL:
+                updateAfterCall(decision);
+                break;
+
+            case CALL_ALL_IN:
+                break;
+
+            case CHECK:
+                break;
+
+            case FOLD:
+                break;
+
+            case RAISE:
+                updateAfterRaise(decision, player);
+                break;
+
+            case RAISE_ALL_IN:
+                updateAfterRaise(decision, player);
+                break;
+
+            case RAISE_INFERIOR_TO_LAST_RAISE:
+                updateAfterRaise(decision, player);
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -236,18 +226,34 @@ public class Game {
         setHighestBet(player.getCurrentBet());
         setLastPlayerToRaise(player);
     }
-    
+
     private void updateAfterCall(Decision decision) {
         addToPot(decision.getBet());
     }
 
     private boolean onePlayerLeft() {
-        return players.size() == 1;
+        int count = 0;
+
+        for (Player player : players) {
+            if (player.lastAction() == null) {
+                return false;
+            }
+
+            if (!player.folded()) {
+                ++count;
+
+                if (count > 1) {
+                    return false;
+                }
+            }
+        }
+
+        return count == 1;
     }
 
     private boolean everyPlayerChecked() {
         for (Player player : players) {
-            Action action = player.latestAction();
+            Action action = player.lastAction();
 
             if (action == null) {
                 return false;
@@ -262,21 +268,21 @@ public class Game {
     }
 
     private boolean raiseChecked(Player player) {
-        return player == lastPlayerToRaise()
-                && player.latestAction().isCheck();
+        return player.equals(lastPlayerToRaise()) 
+                && player.lastAction().isCheck();
     }
 
     private ArrayList<Action> possibleActions(Player player) {
-        
+
         if (noBet()) {
-            return actionsWithoutBet();
+            return actionsWhenNoBet();
         }
 
         if (previousRaise()) {
-            if (player == lastPlayerToRaise()) {
-                return actionsForWhoRaised(player);
-            }
-            
+            if (player.equals(lastPlayerToRaise())) {
+                return actionsForWhoRaised();
+            } 
+
             return actionsAfterRaise(player);
         }
 
@@ -285,45 +291,73 @@ public class Game {
 
     private ArrayList<Action> actionsAfterRaise(Player player) {
         ArrayList<Action> possibleActions = new ArrayList<>();
-        if (player.canFullyRaise(getHighestBet(), getLastRaise())) {
+
+        if (player.canFullyRaise(getHighestBet(), maxRaise())) {
             possibleActions.add(Action.RAISE);
             possibleActions.add(Action.RAISE_ALL_IN);
-        } else if (player.canRaise(getHighestBet(), getLastRaise())) {
+        } else if (player.canRaise(getHighestBet(), maxRaise())) {
             possibleActions.add(Action.RAISE_INFERIOR_TO_LAST_RAISE);
         }
-        
+
         if (player.canCall(getHighestBet())) {
             possibleActions.add(Action.CALL);
         } else {
-            possibleActions.add(Action.CALL_ALL_IN);
+            if (player.canBet()) {
+                possibleActions.add(Action.CALL_ALL_IN);
+            } else {
+                return possibleActions;
+            }
         }
-        
+
         possibleActions.add(Action.FOLD);
-        
+
         return possibleActions;
     }
 
-    private ArrayList<Action> actionsForWhoRaised(Player player) {
+    private ArrayList<Action> actionsForWhoRaised() {
         ArrayList<Action> possibleActions = new ArrayList<>();
         possibleActions.add(Action.CHECK);
-        
-        if (player.canFullyRaise(getHighestBet(), getLastRaise())) {
-            possibleActions.add(Action.RAISE);
-            possibleActions.add(Action.RAISE_ALL_IN);
-        } else if (player.canRaise(getHighestBet(), getLastRaise())) {
-            possibleActions.add(Action.RAISE_INFERIOR_TO_LAST_RAISE);
+        Player player = lastPlayerToRaise();
+
+        if (countWhoCanBetExcept(player) > 0) {
+            if (player.canFullyRaise(getHighestBet(), maxRaise())) {
+                possibleActions.add(Action.RAISE);
+                possibleActions.add(Action.RAISE_ALL_IN);
+            } else if (player.canRaise(getHighestBet(), maxRaise())) {
+                possibleActions.add(Action.RAISE_INFERIOR_TO_LAST_RAISE);
+            }
         }
-        
+
         return possibleActions;
     }
 
-    private ArrayList<Action> actionsWithoutBet() {
+    private int countWhoCanBetExcept(Player player) {
+        int count = 0;
+
+        for (Player p : players) {
+            if (p != player && p.canBet()) {
+                ++count;
+            }
+        }
+
+        return count;
+    }
+
+    private ArrayList<Action> actionsWhenNoBet() {
         ArrayList<Action> possibleActions = new ArrayList<>();
         possibleActions.add(Action.CHECK);
         possibleActions.add(Action.BET);
         possibleActions.add(Action.RAISE_ALL_IN);
         possibleActions.add(Action.FOLD);
-        
+
         return possibleActions;
     }
+
+    @Override
+    public String toString() {
+        return "Game{" + "players=" + players
+                + ", pots=" + pots
+                + ", highestBets=" + highestBets + '}';
+    }
+
 }

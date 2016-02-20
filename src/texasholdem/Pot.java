@@ -36,8 +36,22 @@ class Pot {
     public void setPlayers(ArrayList<Player> players) {
         this.players = players;
     }
-    
+
     public void addChips(int chips) {
         value += chips;
+    }
+
+    @Override
+    public String toString() {
+        String res = "Pot{" + "value=" + value + ", players={";
+        res += players.get(0).getName();
+
+        for (int i = 1; i < players.size() - 1; ++i) {
+            res += ", " + players.get(i).getName();
+        }
+
+        res += "}";
+
+        return res;
     }
 }

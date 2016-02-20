@@ -9,7 +9,7 @@ package texasholdem;
  *
  * @author ricky
  */
-enum Action {
+public enum Action {
 
     BET,
     CALL,

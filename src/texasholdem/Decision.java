@@ -9,7 +9,7 @@ package texasholdem;
  *
  * @author ricky
  */
-class Decision {
+public class Decision {
 
     private Action action;
     private int bet;
