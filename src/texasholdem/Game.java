@@ -130,7 +130,7 @@ public class Game {
     }
 
     void bettingRound() {
-        int smallBlind = (int) (100 * Math.random());
+        int smallBlind = (int) (100 + 51 * Math.random());
         this.raises.add(smallBlind);
         System.out.println("smallblind = " + smallBlind);
         int bigBlind = 2 * smallBlind;
