@@ -144,7 +144,7 @@ public class Game {
             }
 
             Decision decision = player.act(actions, getHighestBet(), maxRaise());
-            applyDecision(decision, player);
+            update(decision, player);
             System.out.println("game = " + this);
 
             if (onePlayerLeft()
@@ -172,7 +172,7 @@ public class Game {
         return i;
     }
 
-    private void applyDecision(Decision decision, Player player) {
+    private void update(Decision decision, Player player) {
         switch (decision.getAction()) {
             case BET:
                 updateAfterRaise(decision, player);
@@ -183,6 +183,7 @@ public class Game {
                 break;
 
             case CALL_ALL_IN:
+                updateAfterCall(decision);
                 break;
 
             case CHECK:
