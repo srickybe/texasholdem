@@ -70,19 +70,7 @@ public class Game {
     private void setLastRaise(int raise) {
         raises.add(raise);
     }
-
-    private int countActivePlayer() {
-        int count = 0;
-
-        for (Player player : players) {
-            if (!player.folded() && !player.isAllIn()) {
-                ++count;
-            }
-        }
-
-        return count;
-    }
-
+    
     private boolean noBet() {
         for (int i = 0; i < players.size(); ++i) {
             Player player = players.get(i);
