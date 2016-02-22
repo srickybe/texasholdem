@@ -51,4 +51,9 @@ public enum Action {
     public boolean isRaiseInferiorToLastRaise() {
         return this.equals(RAISE_INFERIOR_TO_LAST_RAISE);
     }
+    
+    public boolean isAllIn() {
+        return this.equals(CALL_ALL_IN) || this.equals(RAISE_ALL_IN)
+                || this.equals(RAISE_INFERIOR_TO_LAST_RAISE);
+    }
 }

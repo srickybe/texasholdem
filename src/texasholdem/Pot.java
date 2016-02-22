@@ -14,11 +14,16 @@ import java.util.ArrayList;
 class Pot {
 
     private int value;
-    private ArrayList<Player> players;
+    private final ArrayList<Player> players;
 
     public Pot(int value, ArrayList<Player> players) {
         this.value = value;
         this.players = players;
+    }
+
+    public Pot() {
+        this.value = 0;
+        this.players = new ArrayList<>();
     }
 
     public int getValue() {
@@ -29,29 +34,40 @@ class Pot {
         this.value = value;
     }
 
-    public ArrayList<Player> getPlayers() {
-        return players;
+    public Player getPlayer(int index) {
+        return players.get(index);
     }
 
-    public void setPlayers(ArrayList<Player> players) {
-        this.players = players;
+    public void addPlayer(Player player) {
+        if (!this.players.add(player)) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     public void addChips(int chips) {
         value += chips;
     }
+    
+    public int numberOfPlayers() {
+        return players.size();
+    }
 
     @Override
     public String toString() {
-        String res = "Pot{" + "value=" + value + ", players={";
-        res += players.get(0).getName();
-
-        for (int i = 1; i < players.size() - 1; ++i) {
-            res += ", " + players.get(i).getName();
-        }
-
-        res += "}";
-
-        return res;
+        return "Pot{" + "value=" + value + ", players=" + players + '}';
     }
+
+    boolean function() {
+        boolean end = true;
+        
+        for (Player player: players) {
+            if (player.getCurrentBet() > 0) {
+                end = false;
+                break;
+            }
+        }
+        
+        return end;
+    }
+
 }

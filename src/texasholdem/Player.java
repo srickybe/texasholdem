@@ -5,7 +5,6 @@
  */
 package texasholdem;
 
-import com.sun.xml.internal.ws.policy.sourcemodel.wspolicy.NamespaceVersion;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
@@ -85,6 +84,10 @@ public class Player {
         }
     }
 
+    public void addToStack(int chips) {
+        stack += chips;
+    }
+    
     int allIn() {
         int chipsToAddToPot1 = getStack();
         substract(chipsToAddToPot1);

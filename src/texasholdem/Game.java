@@ -70,7 +70,7 @@ public class Game {
     private void setLastRaise(int raise) {
         raises.add(raise);
     }
-    
+
     private boolean noBet() {
         for (int i = 0; i < players.size(); ++i) {
             Player player = players.get(i);
@@ -160,6 +160,8 @@ public class Game {
                 break;
             }
         }
+
+        System.out.println("makePots() = " + makePots());
     }
 
     private int nextInt(int i) {
@@ -220,6 +222,69 @@ public class Game {
         addToPot(decision.getBet());
     }
 
+    private ArrayList<Pot> makePots() {
+        ArrayList<Pot> result = new ArrayList<>();
+        
+        while (true) {
+            int minBet = minimumBet(players, 0);
+            System.out.println("minBet = " + minBet);
+            int potValue = 0;
+            ArrayList<Player> potPlayers = new ArrayList<>();
+
+            for (Player player : players) {
+                if (player.getCurrentBet() < minBet) {
+                    potValue += player.getCurrentBet();
+                    player.setCurrentBet(0);
+                } else {
+                    potValue += minBet;
+                    player.setCurrentBet(player.getCurrentBet() - minBet);
+                    potPlayers.add(player);
+                }
+            }
+
+            Pot pot = new Pot(potValue, potPlayers);
+            result.add(pot);
+            
+            if (1 == potPlayers.size()) {
+                Player player = potPlayers.get(0);
+                player.addToStack(minBet);
+                player.setCurrentBet(0);
+                System.out.println("give back chips to " + player.getName());
+                System.out.println("player = " + player);
+                break;
+            } else {
+                if (pot.function()) {
+                    break;
+                }
+                else{
+                    result.add(pot);
+                    System.out.println("pot = " + pot);
+                }
+            }
+        }
+        
+        return result;
+    }
+
+
+    public int minimumBet(ArrayList<Player> players, int min) {
+        int result = Integer.MAX_VALUE;
+
+        for (Player player : players) {
+            Action action = player.lastAction();
+
+            if (action.isCall() || action.isCheck() || action.isAllIn()) {
+                int bet = player.getCurrentBet();
+
+                if (bet > min && bet < result) {
+                    result = bet;
+                }
+            }
+        }
+
+        return result;
+    }
+
     private boolean onePlayerLeft() {
         int count = 0;
 
@@ -257,7 +322,7 @@ public class Game {
     }
 
     private boolean raiseChecked(Player player) {
-        return player.equals(lastPlayerToRaise()) 
+        return player.equals(lastPlayerToRaise())
                 && player.lastAction().isCheck();
     }
 
@@ -270,7 +335,7 @@ public class Game {
         if (previousRaise()) {
             if (player.equals(lastPlayerToRaise())) {
                 return actionsForWhoRaised();
-            } 
+            }
 
             return actionsAfterRaise(player);
         }
