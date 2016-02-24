@@ -16,7 +16,6 @@ public enum Action {
     CALL_ALL_IN,
     CHECK,
     FOLD,
-    FORCED_BET,
     RAISE,
     RAISE_ALL_IN,
     RAISE_INFERIOR_TO_LAST_RAISE;
@@ -41,10 +40,6 @@ public enum Action {
         return this.equals(FOLD);
     }
 
-    public boolean isForcedBet() {
-        return this.equals(FORCED_BET);
-    }
-
     public boolean isRaise() {
         return this.equals(RAISE);
     }
@@ -56,7 +51,7 @@ public enum Action {
     public boolean isRaiseInferiorToLastRaise() {
         return this.equals(RAISE_INFERIOR_TO_LAST_RAISE);
     }
-
+    
     public boolean isAllIn() {
         return this.equals(CALL_ALL_IN) || this.equals(RAISE_ALL_IN)
                 || this.equals(RAISE_INFERIOR_TO_LAST_RAISE);
