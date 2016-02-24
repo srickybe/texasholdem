@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author ricky
  */
-class Pot {
+public class Pot {
 
     private int chips;
     private final ArrayList<Player> players;
@@ -40,6 +40,10 @@ class Pot {
         }
     }
 
+    public void removePlayer(Player player) {
+        players.remove(player);
+    }
+    
     public void addChips(int chips) {
         this.chips += chips;
     }

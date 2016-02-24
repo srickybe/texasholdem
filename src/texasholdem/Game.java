@@ -38,8 +38,14 @@ public class Game {
             if (!players.add(player)) {
                 throw new UnsupportedOperationException();
             } else {
-                pots.get(pots.size()-1).addPlayer(player);
+                pots.get(pots.size() - 1).addPlayer(player);
             }
+        }
+    }
+
+    public void dealOneCardToPlayers(CardDeck cardDeck) {
+        for (Player player : players) {
+            player.addToHole(cardDeck.pop());
         }
     }
 
@@ -52,7 +58,6 @@ public class Game {
     }
 
     private void addToPot(int chips) {
-        if (!pots.isEmpty())
         pots.get(pots.size() - 1).addChips(chips);
     }
 
@@ -86,9 +91,13 @@ public class Game {
             }
         }
 
-        return false;  
+        return false;
     }
-    
+
+    public void hand() {
+
+    }
+
     private boolean noBet() {
         for (int i = 0; i < players.size(); ++i) {
             Player player = players.get(i);
@@ -135,22 +144,8 @@ public class Game {
         this.players = players;
     }
 
-    public void preFlop() {
-        setSmallBlind();
-        setBigBlind();
-        bettingRound(underTheGunIndex());
-    }
-
-    private void setSmallBlind() {
+    void setSmallBlind() {
         paySmallBlind(players.get(smallBlindIndex()));
-    }
-
-    private void paySmallBlind(Player player) {
-        ArrayList<Action> action = new ArrayList<>();
-        action.add(Action.BET);
-        Decision decision = player.act(action, 0, 1);
-        update(decision, player);
-        smallBlind = decision.getBet();
     }
 
     private int smallBlindIndex() {
@@ -164,21 +159,17 @@ public class Game {
 
         return -1;
     }
-    
-    private int underTheGunIndex() {
-        return nextInt(bigBlindIndex());
-    }
 
-    private void setBigBlind() {
-        payBligBlind(players.get(bigBlindIndex()));
-    }
-
-    private void payBligBlind(Player player) {
+    private void paySmallBlind(Player player) {
         ArrayList<Action> action = new ArrayList<>();
         action.add(Action.BET);
-        Decision decision = player.act(action, smallBlind, smallBlind * 2);
+        Decision decision = player.act(action, 0, 1);
         update(decision, player);
-        bigBlind = decision.getBet();
+        smallBlind = decision.getBet();
+    }
+
+    void setBigBlind() {
+        payBligBlind(players.get(bigBlindIndex()));
     }
 
     private int bigBlindIndex() {
@@ -189,8 +180,20 @@ public class Game {
                 return 1;
             }
         }
-        
+
         return -1;
+    }
+
+    private void payBligBlind(Player player) {
+        ArrayList<Action> action = new ArrayList<>();
+        action.add(Action.BET);
+        Decision decision = player.act(action, smallBlind, smallBlind * 2);
+        update(decision, player);
+        bigBlind = decision.getBet();
+    }
+
+    int underTheGunIndex() {
+        return nextInt(bigBlindIndex());
     }
 
     void bettingRound(int index) {
@@ -227,8 +230,8 @@ public class Game {
         }
 
         if (allInBet()) {
-            pots = makePots();
-            System.out.println("makePots() = " + pots);
+            PotCollection shared = makePots();
+            System.out.println("makePots() = " + shared);
         }
     }
 
@@ -260,6 +263,7 @@ public class Game {
                 break;
 
             case FOLD:
+                updateAfterFold(player);
                 break;
 
             case RAISE:
@@ -289,9 +293,13 @@ public class Game {
     private void updateAfterCall(Decision decision) {
         addToPot(decision.getBet());
     }
+    
+    private void updateAfterFold(Player player) {
+        //pots.removePlayer(player);
+    }
 
-    private ArrayList<Pot> makePots() {
-        ArrayList<Pot> result = new ArrayList<>();
+    private PotCollection makePots() {
+        PotCollection result = new PotCollection();
 
         while (true) {
             Pot pot = creatPot();
@@ -303,7 +311,7 @@ public class Game {
                 if (pot.noChipsLeft()) {
                     return result;
                 } else {
-                    result.add(pot);
+                    result.addPot(pot);
                     System.out.println("pot = " + pot);
                 }
             }
@@ -389,7 +397,6 @@ public class Game {
     }
 
     private ArrayList<Action> possibleActions(Player player) {
-
         if (noBet()) {
             return actionsWhenNoBet();
         }
@@ -469,11 +476,22 @@ public class Game {
         return possibleActions;
     }
 
-    @Override
+    
+    /*@Override
     public String toString() {
         return "Game{" + "players=" + players
                 + ", pots=" + pots
                 + ", highestBets=" + highestBets + '}';
-    }
+    }*/
 
+    @Override
+    public String toString() {
+        return "Game{" + "players=" + players + 
+                ", \n\npots=" + pots + 
+                ", \n\nwhoRaised=" + whoRaised + 
+                ", \n\nraises=" + raises + 
+                ", \n\nhighestBets=" + highestBets + 
+                ", \n\nsmallBlind=" + smallBlind + 
+                ", \n\nbigBlind=" + bigBlind + '}';
+    }
 }

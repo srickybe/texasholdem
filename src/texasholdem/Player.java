@@ -17,12 +17,23 @@ public class Player {
 
     private final String name;
     private int stack;
+    private Hand hole;
+    private Hand hand;
     private int currentBet;
     private final ArrayList<Action> actions;
 
     Player(String name) {
         this.name = name;
         this.stack = (int) (250 + 751 * Math.random());
+        this.currentBet = 0;
+        this.actions = new ArrayList<>();
+    }
+
+    Player(String name, int stack) {
+        this.name = name;
+        this.stack = stack;
+        this.hole = new Hand();
+        this.hand = new Hand();
         this.currentBet = 0;
         this.actions = new ArrayList<>();
     }
@@ -56,7 +67,6 @@ public class Player {
     Decision act(ArrayList<Action> actions, int highestBet, int bigBlind) {
         Action action = choseAction(actions);
         setLatestAction(action);
-        int removedChips = 0;
 
         switch (action) {
             case BET:
@@ -80,14 +90,30 @@ public class Player {
                 return new Decision(action, allIn());
 
             default:
-                return new Decision(action, removedChips);
+                return new Decision(action, 0);
         }
+    }
+
+    public void addToHole(Card card) {
+        if (hole.size() < 2) {
+            if (hole.addCard(card)) {
+                addToHand(card);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private void addToHand(Card card) {
+        hand.addCard(card);
     }
 
     public void addToStack(int chips) {
         stack += chips;
     }
-    
+
     int allIn() {
         int chipsToAddToPot1 = getStack();
         substract(chipsToAddToPot1);
@@ -255,7 +281,8 @@ public class Player {
     public String toString() {
         return "Player{" + "name=" + name
                 + ", chips=" + stack
-                + ", currentBet=" + currentBet + '}';
+                + ", currentBet=" + currentBet 
+                + ", hand=" + hand + '}';
     }
 
     @Override
