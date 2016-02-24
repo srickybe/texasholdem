@@ -13,25 +13,21 @@ import java.util.ArrayList;
  */
 class Pot {
 
-    private int value;
+    private int chips;
     private final ArrayList<Player> players;
 
     public Pot(int value, ArrayList<Player> players) {
-        this.value = value;
+        this.chips = value;
         this.players = players;
     }
 
     public Pot() {
-        this.value = 0;
+        this.chips = 0;
         this.players = new ArrayList<>();
     }
 
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
+    public int getChips() {
+        return chips;
     }
 
     public Player getPlayer(int index) {
@@ -45,29 +41,34 @@ class Pot {
     }
 
     public void addChips(int chips) {
-        value += chips;
+        this.chips += chips;
     }
-    
+
+    void giveBackChips() {
+        Player player = this.getPlayer(0);
+        player.addToStack(this.getChips());
+        player.setCurrentBet(0);
+        System.out.println("give back chips to " + player.getName());
+        System.out.println("player = " + player);
+    }
+
+    boolean noChipsLeft() {
+        for (Player player : players) {
+            if (player.getCurrentBet() > 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public int numberOfPlayers() {
         return players.size();
     }
 
     @Override
     public String toString() {
-        return "Pot{" + "value=" + value + ", players=" + players + '}';
-    }
-
-    boolean function() {
-        boolean end = true;
-        
-        for (Player player: players) {
-            if (player.getCurrentBet() > 0) {
-                end = false;
-                break;
-            }
-        }
-        
-        return end;
+        return "Pot{" + "value=" + chips + ", players=" + players + '}';
     }
 
 }

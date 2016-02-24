@@ -52,7 +52,7 @@ public class Game {
     }
 
     private int getCurrentPot() {
-        return pots.get(pots.size() - 1).getValue();
+        return pots.get(pots.size() - 1).getChips();
     }
 
     private int maxRaise() {
@@ -117,6 +117,17 @@ public class Game {
         this.players = players;
     }
 
+    void preFlop() {
+        int smallBlind = (int) (100 + 51 * Math.random());
+        this.raises.add(smallBlind);
+        System.out.println("smallblind = " + smallBlind);
+        int bigBlind = 2 * smallBlind;
+        this.raises.add(bigBlind);
+        System.out.println("bigBlind = " + bigBlind);
+        setLastPlayerToRaise(null);
+        setHighestBet(0);    
+    }
+    
     void bettingRound() {
         int smallBlind = (int) (100 + 51 * Math.random());
         this.raises.add(smallBlind);
@@ -126,10 +137,9 @@ public class Game {
         System.out.println("bigBlind = " + bigBlind);
         setLastPlayerToRaise(null);
         setHighestBet(0);
-        boolean end = false;
         pots.add(new Pot(0, players));
 
-        for (int i = 0; !end; i = nextInt(i)) {
+        for (int i = 0; ; i = nextInt(i)) {
             System.out.println("#####game = " + this);
             Player player = players.get(i);
 
@@ -224,48 +234,42 @@ public class Game {
 
     private ArrayList<Pot> makePots() {
         ArrayList<Pot> result = new ArrayList<>();
-        
+
         while (true) {
-            int minBet = minimumBet(players, 0);
-            System.out.println("minBet = " + minBet);
-            int potValue = 0;
-            ArrayList<Player> potPlayers = new ArrayList<>();
+            Pot pot = creatPot();
 
-            for (Player player : players) {
-                if (player.getCurrentBet() < minBet) {
-                    potValue += player.getCurrentBet();
-                    player.setCurrentBet(0);
-                } else {
-                    potValue += minBet;
-                    player.setCurrentBet(player.getCurrentBet() - minBet);
-                    potPlayers.add(player);
-                }
-            }
-
-            Pot pot = new Pot(potValue, potPlayers);
-            result.add(pot);
-            
-            if (1 == potPlayers.size()) {
-                Player player = potPlayers.get(0);
-                player.addToStack(minBet);
-                player.setCurrentBet(0);
-                System.out.println("give back chips to " + player.getName());
-                System.out.println("player = " + player);
-                break;
+            if (1 == pot.numberOfPlayers()) {
+                pot.giveBackChips();
+                return result;
             } else {
-                if (pot.function()) {
-                    break;
-                }
-                else{
+                if (pot.noChipsLeft()) {
+                    return result;
+                } else {
                     result.add(pot);
                     System.out.println("pot = " + pot);
                 }
             }
         }
-        
-        return result;
     }
 
+    private Pot creatPot() {
+        int minBet = minimumBet(players, 0);
+        System.out.println("minBet = " + minBet);
+        Pot pot = new Pot();
+
+        for (Player player : players) {
+            if (player.getCurrentBet() < minBet) {
+                pot.addChips(player.getCurrentBet());
+                player.setCurrentBet(0);
+            } else {
+                pot.addChips(minBet);
+                player.setCurrentBet(player.getCurrentBet() - minBet);
+                pot.addPlayer(player);
+            }
+        }
+        
+        return pot;
+    }
 
     public int minimumBet(ArrayList<Player> players, int min) {
         int result = Integer.MAX_VALUE;
