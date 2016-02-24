@@ -18,19 +18,27 @@ public class Game {
     ArrayList<Player> whoRaised;
     ArrayList<Integer> raises;
     ArrayList<Integer> highestBets;
+    private int smallBlind;
+    private int bigBlind;
 
     Game() {
+        this.bigBlind = 0;
         this.players = new ArrayList<>();
         this.pots = new ArrayList<>();
+        this.pots.add(new Pot());
         this.whoRaised = new ArrayList<>();
         this.raises = new ArrayList<>();
         this.highestBets = new ArrayList<>();
+        this.smallBlind = 0;
+        this.bigBlind = 0;
     }
 
     public void add(Player player) {
         if (!players.contains(player)) {
             if (!players.add(player)) {
                 throw new UnsupportedOperationException();
+            } else {
+                pots.get(pots.size()-1).addPlayer(player);
             }
         }
     }
@@ -44,15 +52,12 @@ public class Game {
     }
 
     private void addToPot(int chips) {
+        if (!pots.isEmpty())
         pots.get(pots.size() - 1).addChips(chips);
     }
 
     private int getLastRaise() {
         return raises.get(raises.size() - 1);
-    }
-
-    private int getCurrentPot() {
-        return pots.get(pots.size() - 1).getChips();
     }
 
     private int maxRaise() {
@@ -71,6 +76,19 @@ public class Game {
         raises.add(raise);
     }
 
+    private boolean allInBet() {
+        for (int i = 0; i < players.size(); ++i) {
+            Player player = players.get(i);
+            Action action = player.lastAction();
+
+            if (action != null && !action.isAllIn()) {
+                return true;
+            }
+        }
+
+        return false;  
+    }
+    
     private boolean noBet() {
         for (int i = 0; i < players.size(); ++i) {
             Player player = players.get(i);
@@ -117,29 +135,66 @@ public class Game {
         this.players = players;
     }
 
-    void preFlop() {
-        int smallBlind = (int) (100 + 51 * Math.random());
-        this.raises.add(smallBlind);
-        System.out.println("smallblind = " + smallBlind);
-        int bigBlind = 2 * smallBlind;
-        this.raises.add(bigBlind);
-        System.out.println("bigBlind = " + bigBlind);
-        setLastPlayerToRaise(null);
-        setHighestBet(0);    
+    public void preFlop() {
+        setSmallBlind();
+        setBigBlind();
+        bettingRound(underTheGunIndex());
+    }
+
+    private void setSmallBlind() {
+        paySmallBlind(players.get(smallBlindIndex()));
+    }
+
+    private void paySmallBlind(Player player) {
+        ArrayList<Action> action = new ArrayList<>();
+        action.add(Action.BET);
+        Decision decision = player.act(action, 0, 1);
+        update(decision, player);
+        smallBlind = decision.getBet();
+    }
+
+    private int smallBlindIndex() {
+        if (players.size() > 2) {
+            return 1;
+        } else {
+            if (players.size() == 2) {
+                return 0;
+            }
+        }
+
+        return -1;
     }
     
-    void bettingRound() {
-        int smallBlind = (int) (100 + 51 * Math.random());
-        this.raises.add(smallBlind);
-        System.out.println("smallblind = " + smallBlind);
-        int bigBlind = 2 * smallBlind;
-        this.raises.add(bigBlind);
-        System.out.println("bigBlind = " + bigBlind);
-        setLastPlayerToRaise(null);
-        setHighestBet(0);
-        pots.add(new Pot(0, players));
+    private int underTheGunIndex() {
+        return nextInt(bigBlindIndex());
+    }
 
-        for (int i = 0; ; i = nextInt(i)) {
+    private void setBigBlind() {
+        payBligBlind(players.get(bigBlindIndex()));
+    }
+
+    private void payBligBlind(Player player) {
+        ArrayList<Action> action = new ArrayList<>();
+        action.add(Action.BET);
+        Decision decision = player.act(action, smallBlind, smallBlind * 2);
+        update(decision, player);
+        bigBlind = decision.getBet();
+    }
+
+    private int bigBlindIndex() {
+        if (players.size() > 2) {
+            return 2;
+        } else {
+            if (players.size() == 2) {
+                return 1;
+            }
+        }
+        
+        return -1;
+    }
+
+    void bettingRound(int index) {
+        for (int i = index; true; i = nextInt(i)) {
             System.out.println("#####game = " + this);
             Player player = players.get(i);
 
@@ -171,7 +226,10 @@ public class Game {
             }
         }
 
-        System.out.println("makePots() = " + makePots());
+        if (allInBet()) {
+            pots = makePots();
+            System.out.println("makePots() = " + pots);
+        }
     }
 
     private int nextInt(int i) {
@@ -267,7 +325,7 @@ public class Game {
                 pot.addPlayer(player);
             }
         }
-        
+
         return pot;
     }
 

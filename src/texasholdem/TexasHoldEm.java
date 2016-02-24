@@ -21,7 +21,7 @@ public class TexasHoldEm {
         game.add(new Player("Gery"));
         game.add(new Player("Audry"));
         game.add(new Player("Flora"));
-        game.bettingRound();
+        game.preFlop();
     }
     
 }
