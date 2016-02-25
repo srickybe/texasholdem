@@ -27,15 +27,15 @@ public class TexasHoldEm {
     }
 
     private boolean addPlayer(Player player) {
-        for (Player p: players) {
+        for (Player p : players) {
             if (p.getName().equals(player.getName())) {
                 throw new UnsupportedOperationException();
             }
         }
-        
+
         return players.add(player);
     }
-    
+
     private Integer getIntegerInput() {
         Integer entry = null;
 
@@ -96,7 +96,7 @@ public class TexasHoldEm {
     }
 
     public void setPlayers() {
-        System.out.println("public void setPlayers()");
+        System.out.println("INPUT PLAYERS");
 
         while (true) {
             int choice = -1;
@@ -107,10 +107,7 @@ public class TexasHoldEm {
             }
 
             if (choice == 1) {
-                Player player = new Player(
-                        inputPlayerName(), 
-                        inputPlayerStack());
-                addPlayer(player);
+                addPlayer(inputPlayer());
 
                 if (players.size() == MAX_NUMBER_OF_PLAYERS) {
                     break;
@@ -121,21 +118,32 @@ public class TexasHoldEm {
         }
     }
 
+    private Player inputPlayer() {
+        Player player = new Player(
+                inputPlayerName(),
+                inputPlayerStack());
+        return player;
+    }
+
     private void shuffleCards() {
         cardDeck.shuffle();
     }
-    
+
     private static void TestTexasHoldEm() {
         TexasHoldEm the = new TexasHoldEm();
-        the.addPlayer(new Player("Ricky", 700));
-        the.addPlayer(new Player("Gery", 300));
-        the.addPlayer(new Player("Audry", 500));
-        the.addPlayer(new Player("Flora", 350));
+        Player Ricky = new Player("Ricky", 700);
+        Player Gery = new Player("Gery", 300);
+        Player Audry = new Player("Audry", 500);
+        Player Flora = new Player("Flora", 350);
+        
+        the.addPlayer(Ricky);
+        the.addPlayer(Gery);
+        the.addPlayer(Audry);
+        the.addPlayer(Flora);
         the.playHand();
     }
 
     public static void main(String[] args) {
         TestTexasHoldEm();
     }
-
 }
