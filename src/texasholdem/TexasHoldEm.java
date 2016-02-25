@@ -119,10 +119,7 @@ public class TexasHoldEm {
     }
 
     private Player inputPlayer() {
-        Player player = new Player(
-                inputPlayerName(),
-                inputPlayerStack());
-        return player;
+        return new Player(inputPlayerName(), inputPlayerStack());
     }
 
     private void shuffleCards() {
