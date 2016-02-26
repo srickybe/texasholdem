@@ -20,10 +20,14 @@ public class TexasHoldEm {
     private final int MAX_NUMBER_OF_PLAYERS = 10;
     private final ArrayList<Player> players;
     private final CardDeck cardDeck;
+    private final ArrayList<Card> muck;
+    private final ArrayList<Card> board;
 
     public TexasHoldEm() {
         this.players = new ArrayList<>();
         this.cardDeck = CardDeck.createFiftyTwoCardDeck();
+        this.muck = new ArrayList<>();
+        this.board = new ArrayList<>();
     }
 
     private boolean addPlayer(Player player) {
@@ -34,6 +38,16 @@ public class TexasHoldEm {
         }
 
         return players.add(player);
+    }
+
+    private void burnCard() {
+        muck.add(this.cardDeck.pop());
+    }
+
+    private void flop() {
+        for (int i = 0; i < 3; ++i) {
+            board.add(cardDeck.pop());
+        }
     }
 
     private Integer getIntegerInput() {
@@ -79,7 +93,7 @@ public class TexasHoldEm {
 
         for (Player player : players) {
             if (player.canBet()) {
-                game.add(player);
+                game.addPlayer(player);
             }
         }
 
@@ -93,8 +107,9 @@ public class TexasHoldEm {
                     + " chips");
             return;
         }
-        
+
         System.out.println("New Round!");
+        roundOne(game);
     }
 
     public void preFlop(Game game) {
@@ -104,6 +119,17 @@ public class TexasHoldEm {
         game.dealOneCardToPlayers(cardDeck);
         game.dealOneCardToPlayers(cardDeck);
         game.bettingRound(game.underTheGunIndex());
+    }
+
+    public void roundOne(Game game) {
+        burnCard();
+        System.out.println("*****FLOP*****");
+        flop();
+        System.out.println("board = " + board);
+        game.addToPlayersHand(board.get(0), board.get(1), board.get(2));
+        System.out.println(this.toString());
+        System.out.println("*****BETTING ROUND*****");
+        game.bettingRound(game.firstAfterButtonIndex());
     }
 
     public void setPlayers() {

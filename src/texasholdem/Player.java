@@ -94,20 +94,12 @@ public class Player {
         }
     }
 
-    public void addToHole(Card card) {
-        if (hole.size() < 2) {
-            if (hole.addCard(card)) {
-                addToHand(card);
-            } else {
-                throw new UnsupportedOperationException();
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private void addToHand(Card card) {
+    public void addToHand(Card card) {
         hand.addCard(card);
+        
+        if (hand.size() < 2) {
+            hole.addCard(card);
+        }
     }
 
     public void addToStack(int chips) {
@@ -270,6 +262,10 @@ public class Player {
         return chipsToAddToPot1;
     }
 
+    public void resetActions() {
+        setLatestAction(null);
+    }
+    
     void fold() {
     }
 
@@ -279,10 +275,11 @@ public class Player {
 
     @Override
     public String toString() {
-        return "Player{" + "name=" + name
-                + ", chips=" + stack
-                + ", currentBet=" + currentBet 
-                + ", hand=" + hand + '}';
+        return "Player{" 
+                + "\nname=" + name
+                + ", \nchips=" + stack
+                + ", \ncurrentBet=" + currentBet 
+                + ", \nhand=" + hand + '}';
     }
 
     @Override

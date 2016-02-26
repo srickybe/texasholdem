@@ -18,21 +18,16 @@ public class Game {
     ArrayList<Player> whoRaised;
     ArrayList<Integer> raises;
     ArrayList<Integer> highestBets;
-    private int smallBlind;
-    private int bigBlind;
 
     Game() {
-        this.bigBlind = 0;
         this.players = new ArrayList<>();
         this.pots = new PotCollection();
         this.whoRaised = new ArrayList<>();
         this.raises = new ArrayList<>();
         this.highestBets = new ArrayList<>();
-        this.smallBlind = 0;
-        this.bigBlind = 0;
     }
 
-    public void add(Player player) {
+    public void addPlayer(Player player) {
         if (!players.contains(player)) {
             if (!players.add(player)) {
                 throw new UnsupportedOperationException();
@@ -42,10 +37,28 @@ public class Game {
         }
     }
 
+    public void addToPlayersHand(Card... cards) {
+        for (Card card : cards) {
+            for (Player player : players) {
+                player.addToHand(card);
+            }
+        }
+    }
+
     public void dealOneCardToPlayers(CardDeck cardDeck) {
         for (Player player : players) {
-            player.addToHole(cardDeck.pop());
+            player.addToHand(cardDeck.pop());
         }
+    }
+
+    public int firstAfterButtonIndex() {
+        for (int i = 0; i < players.size(); ++i) {
+            if (!players.get(i).folded() && players.get(i).canBet()) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     private int getHighestBet() {
@@ -70,6 +83,7 @@ public class Game {
 
         for (Player player : players) {
             if (!player.folded()) {
+                result = player;
                 ++count;
 
                 if (count > 1) {
@@ -144,6 +158,20 @@ public class Game {
         return false;
     }
 
+    private void resetPlayersBet() {
+        for (Player player : players) {
+            player.setCurrentBet(0);
+        }
+    }
+
+    private void resetActivePlayersActions() {
+        for (Player player : players) {
+            if (!player.folded()) {
+                player.resetActions();
+            }
+        }
+    }
+
     Player lastPlayerToRaise() {
         if (!whoRaised.isEmpty()) {
             return whoRaised.get(whoRaised.size() - 1);
@@ -181,7 +209,6 @@ public class Game {
         action.add(Action.BET);
         Decision decision = player.act(action, 0, 1);
         update(decision, player);
-        smallBlind = decision.getBet();
     }
 
     void setBigBlind() {
@@ -203,17 +230,25 @@ public class Game {
     private void payBligBlind(Player player) {
         ArrayList<Action> action = new ArrayList<>();
         action.add(Action.BET);
+        int smallBlind = raises.get(0);
         Decision decision = player.act(action, smallBlind, smallBlind * 2);
         update(decision, player);
-        bigBlind = decision.getBet();
     }
 
     int underTheGunIndex() {
-        return nextInt(bigBlindIndex());
+        return nextIndex(bigBlindIndex());
     }
 
     void bettingRound(int index) {
-        for (int i = index; true; i = nextInt(i)) {
+        System.out.println("void bettingRound(" + index + ")");
+        System.out.println("Starting with " + players.get(index).getName());
+        System.out.println("game = \n" + this);
+
+        if (countActivePlayers() < 2) {
+            return;
+        }
+
+        for (int i = index; true; i = nextIndex(i)) {
             Player player = players.get(i);
 
             if (player.folded()) {
@@ -242,9 +277,31 @@ public class Game {
             PotCollection shared = makePots();
             System.out.println("makePots() = " + shared);
         }
+
+        closeBettingRound();
+        System.out.println("game=\n" + this);
     }
 
-    private int nextInt(int i) {
+    private void closeBettingRound() {
+        resetHighestBet();
+        resetPlayersBet();
+        resetActivePlayersActions();
+        removeRaises();
+        setLastPlayerToRaise(null);
+    }
+
+    private void resetHighestBet() {
+        highestBets.clear();
+        highestBets.add(0);
+    }
+
+    private void removeRaises() {
+        for (int i = 2; i < raises.size();) {
+            raises.remove(i);
+        }
+    }
+
+    private int nextIndex(int i) {
         ++i;
 
         if (i >= players.size()) {
@@ -304,6 +361,7 @@ public class Game {
     }
 
     private void updateAfterFold(Player player) {
+        //players.remove(player);
         pots.removePlayer(player);
     }
 
@@ -345,7 +403,7 @@ public class Game {
         }
 
         System.out.println("createPot() = " + pot);
-        
+
         return pot;
     }
 
@@ -387,6 +445,18 @@ public class Game {
         return count == 1;
     }
 
+    public int countActivePlayers() {
+        int count = 0;
+
+        for (Player player : players) {
+            if (!player.folded() && player.canBet()) {
+                ++count;
+            }
+        }
+
+        return count;
+    }
+
     private boolean everyPlayerChecked() {
         for (Player player : players) {
             Action action = player.lastAction();
@@ -409,6 +479,10 @@ public class Game {
     }
 
     private ArrayList<Action> possibleActions(Player player) {
+        if (!player.canBet()) {
+            return new ArrayList();
+        }
+
         if (noBet()) {
             return actionsWhenNoBet();
         }
@@ -496,12 +570,22 @@ public class Game {
      }*/
     @Override
     public String toString() {
-        return "Game{" + "players=" + players
+        String res = "Game{" + "\nplayers=";
+        
+        for (Player player: players) {
+            res += "\n" + player;
+        }
+        
+        res += ",\npots=" + pots;
+        
+        return res;
+        
+        /*return "Game{" + "players=" + players
                 + ", \n\npots=" + pots
-                + ", \n\nwhoRaised=" + whoRaised
-                + ", \n\nraises=" + raises
-                + ", \n\nhighestBets=" + highestBets
-                + ", \n\nsmallBlind=" + smallBlind
-                + ", \n\nbigBlind=" + bigBlind + '}';
+                //+ ", \n\nwhoRaised=" + whoRaised
+                //+ ", \n\nraises=" + raises
+                //+ ", \n\nhighestBets=" + highestBets
+                /*+ ", \n\nsmallBlind=" + smallBlind
+                + ", \n\nbigBlind=" + bigBlind + '}';*/
     }
 }
