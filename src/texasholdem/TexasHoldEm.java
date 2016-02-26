@@ -84,6 +84,17 @@ public class TexasHoldEm {
         }
 
         preFlop(game);
+        Player winner = game.winner();
+
+        if (winner != null) {
+            String name = winner.getName();
+            System.out.println(name + " has won the round");
+            System.out.println(name + " has now " + winner.getStack()
+                    + " chips");
+            return;
+        }
+        
+        System.out.println("New Round!");
     }
 
     public void preFlop(Game game) {
@@ -132,7 +143,7 @@ public class TexasHoldEm {
         Player Gery = new Player("Gery", 300);
         Player Audry = new Player("Audry", 500);
         Player Flora = new Player("Flora", 350);
-        
+
         the.addPlayer(Ricky);
         the.addPlayer(Gery);
         the.addPlayer(Audry);

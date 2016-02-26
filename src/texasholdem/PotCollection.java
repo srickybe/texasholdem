@@ -5,7 +5,7 @@
  */
 package texasholdem;
 
-import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  *
@@ -13,18 +13,32 @@ import java.util.ArrayList;
  */
 public class PotCollection {
 
-    private final ArrayList<Pot> pots;
+    private final Stack<Pot> pots;
 
     public PotCollection() {
-        pots = new ArrayList<>();
+        pots = new Stack<>();
     }
 
     public void addPot(Pot pot) {
         pots.add(pot);
     }
 
-    public Pot lastPot() {
-        return pots.get(pots.size() - 1);
+    public void addChips(int chips) {
+        currentPot().addChips(chips);
+    }
+
+    public void addPlayer(Player player) {
+        currentPot().addPlayer(player);
+    }
+
+    private Pot currentPot() {
+        if (!pots.isEmpty()) {
+            return pots.peek();
+        } else {
+            pots.add(new Pot());
+            
+            return pots.peek();
+        }
     }
 
     public void removePlayer(Player player) {
@@ -35,7 +49,7 @@ public class PotCollection {
 
     @Override
     public String toString() {
-        String res = "" + "Pots{" + "pots=";
+        String res = "" + "Pots{" + "pots=[";
 
         for (int i = 0; i < pots.size() - 1; ++i) {
             Pot pot = pots.get(i);
@@ -46,18 +60,30 @@ public class PotCollection {
                 res += pot.getPlayer(j).getName() + ", ";
             }
 
-            res += pot.getPlayer(nPlayers - 1).getName() + "]}, ";
+            if (nPlayers > 0) {
+                res += pot.getPlayer(nPlayers - 1).getName();
+            }
+
+            res += "]}, ";
         }
 
-        Pot pot = pots.get(pots.size() - 1);
-        res += "Pot{" + "value=" + pot.getChips() + ", players=[";
-        int nPlayers = pot.numberOfPlayers();
+        if (!pots.isEmpty()) {
+            Pot pot = pots.get(pots.size() - 1);
+            res += "Pot{" + "value=" + pot.getChips() + ", players=[";
+            int nPlayers = pot.numberOfPlayers();
 
-        for (int j = 0; j < nPlayers - 1; ++j) {
-            res += pot.getPlayer(j).getName() + ", ";
+            for (int j = 0; j < nPlayers - 1; ++j) {
+                res += pot.getPlayer(j).getName() + ", ";
+            }
+
+            if (nPlayers > 0) {
+                res += pot.getPlayer(nPlayers - 1).getName();
+            }
+            
+            res += "]}";
         }
 
-        res += pot.getPlayer(nPlayers - 1).getName() + "]}}";
+        res += "]}";
 
         return res;
     }

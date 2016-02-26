@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class Game {
 
     ArrayList<Player> players;
-    ArrayList<Pot> pots;
+    PotCollection pots;
     ArrayList<Player> whoRaised;
     ArrayList<Integer> raises;
     ArrayList<Integer> highestBets;
@@ -24,8 +24,7 @@ public class Game {
     Game() {
         this.bigBlind = 0;
         this.players = new ArrayList<>();
-        this.pots = new ArrayList<>();
-        this.pots.add(new Pot());
+        this.pots = new PotCollection();
         this.whoRaised = new ArrayList<>();
         this.raises = new ArrayList<>();
         this.highestBets = new ArrayList<>();
@@ -38,7 +37,7 @@ public class Game {
             if (!players.add(player)) {
                 throw new UnsupportedOperationException();
             } else {
-                pots.get(pots.size() - 1).addPlayer(player);
+                pots.addPlayer(player);
             }
         }
     }
@@ -58,11 +57,28 @@ public class Game {
     }
 
     private void addToPot(int chips) {
-        pots.get(pots.size() - 1).addChips(chips);
+        pots.addChips(chips);
     }
 
     private int getLastRaise() {
         return raises.get(raises.size() - 1);
+    }
+
+    public Player winner() {
+        Player result = null;
+        int count = 0;
+
+        for (Player player : players) {
+            if (!player.folded()) {
+                ++count;
+
+                if (count > 1) {
+                    return null;
+                }
+            }
+        }
+
+        return result;
     }
 
     private int maxRaise() {
@@ -198,7 +214,6 @@ public class Game {
 
     void bettingRound(int index) {
         for (int i = index; true; i = nextInt(i)) {
-            System.out.println("#####game = " + this);
             Player player = players.get(i);
 
             if (player.folded()) {
@@ -213,18 +228,12 @@ public class Game {
 
             Decision decision = player.act(actions, getHighestBet(), maxRaise());
             update(decision, player);
-            System.out.println("game = " + this);
+            System.out.println(player.getName() + " acted!!!");
+            System.out.println(player.getName() + " status:\n" + player);
 
             if (onePlayerLeft()
                     || raiseChecked(player)
                     || (everyPlayerChecked() && player.doubleChecked())) {
-                System.out.println("onPlayerLeft() = " + onePlayerLeft());
-                System.out.println("raiseChecked(player) = "
-                        + raiseChecked(player));
-                System.out.println("everyPlayerChecked() = "
-                        + everyPlayerChecked());
-                System.out.println("player.doubleChecked() = "
-                        + player.doubleChecked());
                 break;
             }
         }
@@ -293,9 +302,9 @@ public class Game {
     private void updateAfterCall(Decision decision) {
         addToPot(decision.getBet());
     }
-    
+
     private void updateAfterFold(Player player) {
-        //pots.removePlayer(player);
+        pots.removePlayer(player);
     }
 
     private PotCollection makePots() {
@@ -309,6 +318,7 @@ public class Game {
                 return result;
             } else {
                 if (pot.noChipsLeft()) {
+                    result.addPot(pot);
                     return result;
                 } else {
                     result.addPot(pot);
@@ -334,6 +344,8 @@ public class Game {
             }
         }
 
+        System.out.println("createPot() = " + pot);
+        
         return pot;
     }
 
@@ -476,22 +488,20 @@ public class Game {
         return possibleActions;
     }
 
-    
     /*@Override
-    public String toString() {
-        return "Game{" + "players=" + players
-                + ", pots=" + pots
-                + ", highestBets=" + highestBets + '}';
-    }*/
-
+     public String toString() {
+     return "Game{" + "players=" + players
+     + ", pots=" + pots
+     + ", highestBets=" + highestBets + '}';
+     }*/
     @Override
     public String toString() {
-        return "Game{" + "players=" + players + 
-                ", \n\npots=" + pots + 
-                ", \n\nwhoRaised=" + whoRaised + 
-                ", \n\nraises=" + raises + 
-                ", \n\nhighestBets=" + highestBets + 
-                ", \n\nsmallBlind=" + smallBlind + 
-                ", \n\nbigBlind=" + bigBlind + '}';
+        return "Game{" + "players=" + players
+                + ", \n\npots=" + pots
+                + ", \n\nwhoRaised=" + whoRaised
+                + ", \n\nraises=" + raises
+                + ", \n\nhighestBets=" + highestBets
+                + ", \n\nsmallBlind=" + smallBlind
+                + ", \n\nbigBlind=" + bigBlind + '}';
     }
 }
