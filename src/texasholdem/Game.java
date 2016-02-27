@@ -116,7 +116,7 @@ public class Game {
             Player player = players.get(i);
             Action action = player.lastAction();
 
-            if (action != null && !action.isAllIn()) {
+            if (action != null && action.isAllIn()) {
                 return true;
             }
         }
@@ -241,6 +241,11 @@ public class Game {
 
     void bettingRound(int index) {
         System.out.println("void bettingRound(" + index + ")");
+
+        if (index == -1) {
+            return;
+        }
+
         System.out.println("Starting with " + players.get(index).getName());
         System.out.println("game = \n" + this);
 
@@ -268,10 +273,14 @@ public class Game {
 
             if (onePlayerLeft()
                     || raiseChecked(player)
-                    || (everyPlayerChecked() && player.doubleChecked())) {
+                    || (everyPlayerChecked() && player.doubleChecked())
+                    || allAllIn()) {
                 break;
             }
         }
+        
+        System.out.println("allAllIn() = " + allAllIn());
+        System.out.println("allInBet() = " + allInBet());
 
         if (allInBet()) {
             PotCollection shared = makePots();
@@ -280,6 +289,22 @@ public class Game {
 
         closeBettingRound();
         System.out.println("game=\n" + this);
+    }
+
+    private boolean allAllIn() {
+        for (Player player : players) {
+            if (player.lastAction() != null) {
+                if (!player.folded()) {
+                    if (!player.lastAction().isAllIn()) {
+                        return false;
+                    }
+                }
+            } else {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void closeBettingRound() {
@@ -571,21 +596,21 @@ public class Game {
     @Override
     public String toString() {
         String res = "Game{" + "\nplayers=";
-        
-        for (Player player: players) {
+
+        for (Player player : players) {
             res += "\n" + player;
         }
-        
+
         res += ",\npots=" + pots;
-        
+
         return res;
-        
+
         /*return "Game{" + "players=" + players
-                + ", \n\npots=" + pots
-                //+ ", \n\nwhoRaised=" + whoRaised
-                //+ ", \n\nraises=" + raises
-                //+ ", \n\nhighestBets=" + highestBets
-                /*+ ", \n\nsmallBlind=" + smallBlind
-                + ", \n\nbigBlind=" + bigBlind + '}';*/
+         + ", \n\npots=" + pots
+         //+ ", \n\nwhoRaised=" + whoRaised
+         //+ ", \n\nraises=" + raises
+         //+ ", \n\nhighestBets=" + highestBets
+         /*+ ", \n\nsmallBlind=" + smallBlind
+         + ", \n\nbigBlind=" + bigBlind + '}';*/
     }
 }
