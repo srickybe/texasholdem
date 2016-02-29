@@ -247,7 +247,7 @@ public class Game {
         }
 
         System.out.println("Starting with " + players.get(index).getName());
-        System.out.println("game = \n" + this);
+        //System.out.println("game = \n" + this);
 
         if (countActivePlayers() < 2) {
             return;
@@ -278,13 +278,14 @@ public class Game {
                 break;
             }
         }
-        
+
         System.out.println("allAllIn() = " + allAllIn());
         System.out.println("allInBet() = " + allInBet());
 
         if (allInBet()) {
             PotCollection shared = makePots();
             System.out.println("makePots() = " + shared);
+            pots = shared;
         }
 
         closeBettingRound();
@@ -405,7 +406,7 @@ public class Game {
                     return result;
                 } else {
                     result.addPot(pot);
-                    System.out.println("pot = " + pot);
+                    //System.out.println("pot = " + pot);
                 }
             }
         }
@@ -438,11 +439,13 @@ public class Game {
         for (Player player : players) {
             Action action = player.lastAction();
 
-            if (action.isCall() || action.isCheck() || action.isAllIn()) {
-                int bet = player.getCurrentBet();
+            if (action != null) {
+                if (action.isCall() || action.isCheck() || action.isAllIn()) {
+                    int bet = player.getCurrentBet();
 
-                if (bet > min && bet < result) {
-                    result = bet;
+                    if (bet > min && bet < result) {
+                        result = bet;
+                    }
                 }
             }
         }
@@ -504,14 +507,13 @@ public class Game {
     }
 
     private ArrayList<Action> possibleActions(Player player) {
-        if (!player.canBet()) {
-            return new ArrayList();
-        }
-
         if (noBet()) {
             return actionsWhenNoBet();
         }
 
+        /*if (!player.canBet() && !player.equals(lastPlayerToRaise())) {
+         return new ArrayList();
+         }*/
         if (previousRaise()) {
             if (player.equals(lastPlayerToRaise())) {
                 return actionsForWhoRaised();

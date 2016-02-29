@@ -89,14 +89,20 @@ public class Player {
             case CALL_ALL_IN:
                 return new Decision(action, allIn());
 
-            default:
+            case FOLD:
                 return new Decision(action, 0);
+
+            case CHECK:
+                return new Decision(action, 0);
+
+            default:
+                throw new UnsupportedOperationException();
         }
     }
 
     public void addToHand(Card card) {
         hand.addCard(card);
-        
+
         if (hand.size() < 2) {
             hole.addCard(card);
         }
@@ -219,12 +225,13 @@ public class Player {
     public boolean doubleChecked() {
         int actionCount = actions.size();
 
-        if (actionCount >= 2) {
-            return actions.get(actionCount - 1).isCheck()
-                    && actions.get(actionCount - 2).isCheck();
-        }
+        System.out.println("actions = " + actions);
 
-        return false;
+        return actionCount >= 2
+                && actions.get(actionCount - 1) != null
+                && actions.get(actionCount - 1).isCheck()
+                && actions.get(actionCount - 2) != null
+                && actions.get(actionCount - 2).isCheck();
     }
 
     int raiseAllIn(int highestBet) {
@@ -240,9 +247,11 @@ public class Player {
 
         int bet = -1;
 
-        while (bet < highestBet + 2 * lastRaise || bet > getStack()) {
-            System.out.println("Bet higher than "
-                    + (highestBet + 2 * lastRaise));
+        while (bet < highestBet + 2 * lastRaise
+                || bet >= highestBet + getStack()) {
+            System.out.println("Raise at least to "
+                    + (highestBet + 2 * lastRaise)
+                    + " and raise at most to " + (highestBet + getStack() - 1));
             bet = getIntegerInput();
         }
 
@@ -265,7 +274,7 @@ public class Player {
     public void resetActions() {
         setLatestAction(null);
     }
-    
+
     void fold() {
     }
 
@@ -275,10 +284,10 @@ public class Player {
 
     @Override
     public String toString() {
-        return "Player{" 
+        return "Player{"
                 + "\nname=" + name
                 + ", \nchips=" + stack
-                + ", \ncurrentBet=" + currentBet 
+                + ", \ncurrentBet=" + currentBet
                 + ", \nhand=" + hand + '}';
     }
 

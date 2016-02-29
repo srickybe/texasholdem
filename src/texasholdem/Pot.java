@@ -72,7 +72,21 @@ public class Pot {
 
     @Override
     public String toString() {
-        return "Pot{" + "value=" + chips + ", players=" + players + '}';
+        String res = "" + "Pot{";
+        res += "value=" + chips;
+        res += ", players=[";
+        
+        for (int i = 0; i < players.size()-1; ++i) {
+            res += players.get(i).getName() + ", ";
+        }
+        
+        if (!players.isEmpty()) {
+            res += players.get(players.size()-1).getName();
+        }
+        
+        res += "]}";
+        
+        return res;
     }
 
 }
