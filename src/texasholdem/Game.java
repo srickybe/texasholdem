@@ -399,7 +399,6 @@ public class Game {
     }
 
     private void updateAfterFold(Player player) {
-        //players.remove(player);
         pots.removePlayer(player);
     }
 
@@ -418,7 +417,6 @@ public class Game {
                     return result;
                 } else {
                     result.addPot(pot);
-                    //System.out.println("pot = " + pot);
                 }
             }
         }
@@ -523,9 +521,6 @@ public class Game {
             return actionsWhenNoBet();
         }
 
-        /*if (!player.canBet() && !player.equals(lastPlayerToRaise())) {
-         return new ArrayList();
-         }*/
         if (previousRaise()) {
             if (player.equals(lastPlayerToRaise())) {
                 return actionsForWhoRaised();
@@ -601,12 +596,6 @@ public class Game {
         return possibleActions;
     }
 
-    /*@Override
-     public String toString() {
-     return "Game{" + "players=" + players
-     + ", pots=" + pots
-     + ", highestBets=" + highestBets + '}';
-     }*/
     @Override
     public String toString() {
         String res = "Game{" + "\nplayers=";
