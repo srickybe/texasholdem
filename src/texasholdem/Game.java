@@ -31,10 +31,12 @@ public class Game {
         if (!players.contains(player)) {
             if (!players.add(player)) {
                 throw new UnsupportedOperationException();
-            } else {
-                pots.addPlayer(player);
             }
         }
+    }
+
+    private void addPlayerToPot(Player player) {
+        pots.addPlayer(player);
     }
 
     public void addToPlayersHand(Card... cards) {
@@ -52,7 +54,7 @@ public class Game {
     }
 
     public int firstAfterButtonIndex() {
-        for (int i = 0; i < players.size(); ++i) {
+        for (int i = 1; i < players.size(); i = nextIndex(i)) {
             if (!players.get(i).folded() && players.get(i).canBet()) {
                 return i;
             }
@@ -242,12 +244,11 @@ public class Game {
     void bettingRound(int index) {
         System.out.println("void bettingRound(" + index + ")");
 
-        if (index == -1) {
+        if (index < 0 || index >= players.size()) {
             return;
         }
 
         System.out.println("Starting with " + players.get(index).getName());
-        //System.out.println("game = \n" + this);
 
         if (countActivePlayers() < 2) {
             return;
@@ -285,11 +286,22 @@ public class Game {
         if (allInBet()) {
             PotCollection shared = makePots();
             System.out.println("makePots() = " + shared);
-            pots = shared;
+            pots.popPot();
+            pots.addPots(shared);
         }
 
         closeBettingRound();
         System.out.println("game=\n" + this);
+    }
+
+    public void initializePots() {
+        pots.addPot(new Pot());
+
+        for (Player player : players) {
+            if (!player.folded() && player.canBet()) {
+                pots.addPlayer(player);
+            }
+        }
     }
 
     private boolean allAllIn() {

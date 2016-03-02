@@ -21,8 +21,13 @@ public class PotCollection {
 
     public void addPot(Pot pot) {
         pots.add(pot);
+        System.out.println("pots.empty()? " + pots.empty());
     }
 
+    public void addPots(PotCollection potCollection) {
+        this.pots.addAll(potCollection.pots);
+    }
+    
     public void addChips(int chips) {
         currentPot().addChips(chips);
     }
@@ -32,13 +37,15 @@ public class PotCollection {
     }
 
     private Pot currentPot() {
-        if (!pots.isEmpty()) {
-            return pots.peek();
-        } else {
-            pots.add(new Pot());
-            
-            return pots.peek();
-        }
+        return pots.peek();
+    }
+
+    public boolean isEmpty() {
+        return pots.isEmpty();
+    }
+
+    public Pot popPot() {
+        return pots.pop();
     }
 
     public void removePlayer(Player player) {
@@ -79,7 +86,7 @@ public class PotCollection {
             if (nPlayers > 0) {
                 res += pot.getPlayer(nPlayers - 1).getName();
             }
-            
+
             res += "]}";
         }
 

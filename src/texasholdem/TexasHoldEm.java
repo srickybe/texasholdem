@@ -108,11 +108,14 @@ public class TexasHoldEm {
             return;
         }
 
-        System.out.println("New Round!");
-        roundOne(game);
+        if (game.countActivePlayers() > 1) {
+            System.out.println("New Round!");
+            roundOne(game);
+        }
     }
 
     public void preFlop(Game game) {
+        game.initializePots();
         game.setSmallBlind();
         game.setBigBlind();
         shuffleCards();
@@ -129,6 +132,7 @@ public class TexasHoldEm {
         game.addToPlayersHand(board.get(0), board.get(1), board.get(2));
         System.out.println(this.toString());
         System.out.println("*****BETTING ROUND*****");
+        game.initializePots();
         game.bettingRound(game.firstAfterButtonIndex());
     }
 
