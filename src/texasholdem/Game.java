@@ -41,16 +41,16 @@ public class Game {
 
     public void addToPlayersHand(Card... cards) {
         for (Card card : cards) {
-            for (Player player : players) {
+            players.stream().forEach((player) -> {
                 player.addToHand(card);
-            }
+            });
         }
     }
 
     public void dealOneCardToPlayers(CardDeck cardDeck) {
-        for (Player player : players) {
+        players.stream().forEach((player) -> {
             player.addToHand(cardDeck.pop());
-        }
+        });
     }
 
     public int firstAfterButtonIndex() {
@@ -244,15 +244,11 @@ public class Game {
     void bettingRound(int index) {
         System.out.println("void bettingRound(" + index + ")");
 
-        if (index < 0 || index >= players.size()) {
+        if (index < 0 || index >= players.size() || countActivePlayers() < 2) {
             return;
         }
 
         System.out.println("Starting with " + players.get(index).getName());
-
-        if (countActivePlayers() < 2) {
-            return;
-        }
 
         for (int i = index; true; i = nextIndex(i)) {
             Player player = players.get(i);
@@ -274,8 +270,7 @@ public class Game {
 
             if (onePlayerLeft()
                     || raiseChecked(player)
-                    || (everyPlayerChecked() && player.doubleChecked())
-                    || allAllIn()) {
+                    || (everyPlayerChecked() && player.doubleChecked())) {
                 break;
             }
         }
