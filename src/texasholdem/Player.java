@@ -120,6 +120,10 @@ public class Player {
         return chipsToAddToPot1;
     }
 
+    public Hand bestHand() {
+        return hand.bestHand();
+    }
+
     int bet(int bigBlind) {
         Integer chipsToAddToPot1 = 0;
 
@@ -197,6 +201,23 @@ public class Player {
         }
 
         return actions.get(choice);
+    }
+
+    public String decideToShowHand() {
+        Scanner input = new Scanner(System.in);
+        String decision = null;
+
+        while (decision == null
+                || (!"Y".equals(decision)
+                && !"N".equals(decision))) {
+            try {
+                decision = input.next();
+            } catch (Exception e) {
+                decision = null;
+            }
+        }
+
+        return decision;
     }
 
     public boolean folded() {

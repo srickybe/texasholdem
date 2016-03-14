@@ -16,10 +16,10 @@ public class Pot {
     private int chips;
     private final ArrayList<Player> players;
 
-    public Pot(int value, ArrayList<Player> players) {
+    /*public Pot(int value, ArrayList<Player> players) {
         this.chips = value;
         this.players = players;
-    }
+    }*/
 
     public Pot() {
         this.chips = 0;

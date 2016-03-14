@@ -111,7 +111,50 @@ public class TexasHoldEm {
         if (game.countActivePlayers() > 1) {
             System.out.println("New Round!");
             roundOne(game);
+
+            winner = game.winner();
+
+            if (winner != null) {
+                String name = winner.getName();
+                System.out.println(name + " has won the round");
+                System.out.println(name + " has now " + winner.getStack()
+                        + " chips");
+                return;
+            }
         }
+
+        if (game.countActivePlayers() > 1) {
+            System.out.println("New Round!");
+            roundTwo(game);
+
+            winner = game.winner();
+
+            if (winner != null) {
+                String name = winner.getName();
+                System.out.println(name + " has won the round");
+                System.out.println(name + " has now " + winner.getStack()
+                        + " chips");
+                return;
+            }
+        }
+
+        if (game.countActivePlayers() > 1) {
+            System.out.println("New Round!");
+            roundThree(game);
+
+            winner = game.winner();
+
+            if (winner != null) {
+                String name = winner.getName();
+                System.out.println(name + " has won the round");
+                System.out.println(name + " has now " + winner.getStack()
+                        + " chips");
+                return;
+            }
+        }
+        
+        game.showdown();
+
     }
 
     public void preFlop(Game game) {
@@ -134,6 +177,38 @@ public class TexasHoldEm {
         System.out.println("*****BETTING ROUND*****");
         game.initializePots();
         game.bettingRound(game.firstAfterButtonIndex());
+    }
+
+    public void roundTwo(Game game) {
+        burnCard();
+        System.out.println("*****THE TURN*****");
+        turn();
+        System.out.println("board = " + board);
+        game.addToPlayersHand(board.get(3));
+        System.out.println(this.toString());
+        System.out.println("*****BETTING ROUND*****");
+        game.initializePots();
+        game.bettingRound(game.firstAfterButtonIndex());
+    }
+
+    public void turn() {
+        board.add(cardDeck.pop());
+    }
+
+    public void roundThree(Game game) {
+        burnCard();
+        System.out.println("*****THE RIVER*****");
+        river();
+        System.out.println("board = " + board);
+        game.addToPlayersHand(board.get(4));
+        System.out.println(this.toString());
+        System.out.println("*****BETTING ROUND*****");
+        game.initializePots();
+        game.bettingRound(game.firstAfterButtonIndex());
+    }
+
+    public void river() {
+        board.add(cardDeck.pop());
     }
 
     public void setPlayers() {
@@ -162,7 +237,7 @@ public class TexasHoldEm {
     private Player inputPlayer() {
         return new Player(inputPlayerName(), inputPlayerStack());
     }
-
+    
     private void shuffleCards() {
         cardDeck.shuffle();
     }

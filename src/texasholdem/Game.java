@@ -18,6 +18,7 @@ public class Game {
     ArrayList<Player> whoRaised;
     ArrayList<Integer> raises;
     ArrayList<Integer> highestBets;
+    ArrayList<Pot> pot;
 
     Game() {
         this.players = new ArrayList<>();
@@ -77,6 +78,26 @@ public class Game {
 
     private int getLastRaise() {
         return raises.get(raises.size() - 1);
+    }
+
+    public Player lastToHaveRaised() {
+        if (!whoRaised.isEmpty()) {
+            for (int i = whoRaised.size() - 1; i >= 0; --i) {
+                if (whoRaised.get(i) != null) {
+                    return whoRaised.get(i);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    Player lastPlayerToRaise() {
+        if (!whoRaised.isEmpty()) {
+            return whoRaised.get(whoRaised.size() - 1);
+        }
+
+        return null;
     }
 
     public Player winner() {
@@ -172,14 +193,6 @@ public class Game {
                 player.resetActions();
             }
         }
-    }
-
-    Player lastPlayerToRaise() {
-        if (!whoRaised.isEmpty()) {
-            return whoRaised.get(whoRaised.size() - 1);
-        }
-
-        return null;
     }
 
     void setLastPlayerToRaise(Player player) {
@@ -401,17 +414,17 @@ public class Game {
         PotCollection result = new PotCollection();
 
         while (true) {
-            Pot pot = creatPot();
+            Pot pt = creatPot();
 
-            if (1 == pot.numberOfPlayers()) {
-                pot.giveBackChips();
+            if (1 == pt.numberOfPlayers()) {
+                pt.giveBackChips();
                 return result;
             } else {
-                if (pot.noChipsLeft()) {
-                    result.addPot(pot);
+                if (pt.noChipsLeft()) {
+                    result.addPot(pt);
                     return result;
                 } else {
-                    result.addPot(pot);
+                    result.addPot(pt);
                 }
             }
         }
@@ -420,22 +433,22 @@ public class Game {
     private Pot creatPot() {
         int minBet = minimumBet(players, 0);
         System.out.println("minBet = " + minBet);
-        Pot pot = new Pot();
+        Pot result = new Pot();
 
         for (Player player : players) {
             if (player.getCurrentBet() < minBet) {
-                pot.addChips(player.getCurrentBet());
+                result.addChips(player.getCurrentBet());
                 player.setCurrentBet(0);
             } else {
-                pot.addChips(minBet);
+                result.addChips(minBet);
                 player.setCurrentBet(player.getCurrentBet() - minBet);
-                pot.addPlayer(player);
+                result.addPlayer(player);
             }
         }
 
-        System.out.println("createPot() = " + pot);
+        System.out.println("createPot() = " + result);
 
-        return pot;
+        return result;
     }
 
     public int minimumBet(ArrayList<Player> players, int min) {
@@ -589,6 +602,59 @@ public class Game {
         possibleActions.add(Action.FOLD);
 
         return possibleActions;
+    }
+
+    public void showdown() {
+        Player lastToRaise = lastToHaveRaised();
+        int index
+                = lastToRaise != null
+                        ? players.indexOf(lastToRaise)
+                        : 0;
+        System.out.println("lastToRaise = " + lastToRaise);
+        System.out.println("index = " + index);
+       
+        ArrayList<Player> winners = new ArrayList<>();
+        Player currentWinner = players.get(index);
+        winners.add(currentWinner);
+        System.out.println(currentWinner.getName()
+                + ", SHOW YOUR HAND, PLEASE");
+        Hand bestHand = currentWinner.bestHand();
+        System.out.println("Best hand = " + bestHand.toString());
+
+        for (int i = nextIndex(index); i < players.size(); i = nextIndex(i)) {
+            if (i == index) {
+                break;
+            }
+
+            Player player = players.get(i);
+
+            if (!player.folded()) {
+                System.out.println(player.getName() + ", WILL YOU SHOW YOUR HAND?");
+                String decision = player.decideToShowHand();
+                System.out.println("decision = " + decision);
+
+                if ("Y".equals(decision)) {
+                    Hand hand = player.bestHand();
+                    int cmp = bestHand.compareTo(hand);
+                    System.out.println("hand = " + hand.toString());
+                    System.out.println("cmp = " + cmp);
+
+                    if (cmp < 0) {
+                        System.out.println(player.getName()
+                                + " has up to now the best Hand");
+                        bestHand = hand;
+                        winners.clear();
+                        winners.add(player);
+                    } else if (cmp == 0) {
+                        System.out.println(player.getName() + " has an equal hand");
+                        winners.add(player);
+                    }
+                }
+            }
+        }
+
+        System.out.println("The winner(s) is (are): " + winners.toString() + "\n");
+        System.out.println("The best is:\n" + bestHand);
     }
 
     @Override
