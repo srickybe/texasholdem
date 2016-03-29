@@ -94,5 +94,15 @@ public class PotCollection {
 
         return res;
     }
+    
+    public int chips() {
+        int res = 0;
+        
+        for (Pot pot: pots) {
+            res += pot.getChips();
+        }
+        
+        return res;
+    }
 
 }

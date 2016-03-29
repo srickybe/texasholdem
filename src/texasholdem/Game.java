@@ -288,6 +288,7 @@ public class Game {
             }
         }
 
+        System.out.println("######pot = " + pots.chips());
         System.out.println("allAllIn() = " + allAllIn());
         System.out.println("allInBet() = " + allInBet());
 
@@ -298,6 +299,7 @@ public class Game {
             pots.addPots(shared);
         }
 
+        System.out.println("######pot = " + pots.chips());
         closeBettingRound();
         System.out.println("game=\n" + this);
     }
