@@ -18,7 +18,7 @@ public class Game {
     ArrayList<Player> whoRaised;
     ArrayList<Integer> raises;
     ArrayList<Integer> highestBets;
-    ArrayList<Pot> pot;
+    Integer pot;
 
     Game() {
         this.players = new ArrayList<>();
@@ -26,6 +26,7 @@ public class Game {
         this.whoRaised = new ArrayList<>();
         this.raises = new ArrayList<>();
         this.highestBets = new ArrayList<>();
+        this.pot = 0;
     }
 
     public void addPlayer(Player player) {
@@ -74,6 +75,7 @@ public class Game {
 
     private void addToPot(int chips) {
         pots.addChips(chips);
+        pot += chips;
     }
 
     private int getLastRaise() {
@@ -289,6 +291,8 @@ public class Game {
         }
 
         System.out.println("######pot = " + pots.chips());
+        System.out.println("@@@@@@pot = +"
+                + "" + pot);
         System.out.println("allAllIn() = " + allAllIn());
         System.out.println("allInBet() = " + allInBet());
 
